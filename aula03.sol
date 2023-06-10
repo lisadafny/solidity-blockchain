@@ -15,7 +15,7 @@ constructor(string memory locador, string memory locatorio, uint32 valorInicialA
 }
 
  function valorAluguelMes(uint8 mes) external view returns(uint32 aluguel){
-return _valorAluguel[mes + 1];
+    return _valorAluguel[mes - 1];
  }
 
  function partesDoContrato() external view returns(string memory locador, string memory locatario){
