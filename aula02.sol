@@ -6,17 +6,15 @@ contract ContratoVendedor{
 string public _vendedor;
 //bonus dele (fator do bonus)
 uint256 public _fatorBonus;
-uint256 public _valorVenda;
 
-constructor(string memory vendedor, uint256 fatorBonus, uint256 valorVenda){
+constructor(string memory vendedor, uint256 fatorBonus){
     _vendedor = vendedor;
     _fatorBonus = fatorBonus;
-    _valorVenda = valorVenda;
 }
 
 //função que passando o valor de venda ele retorna o valor do bonus
-    function processarVenda() public view returns (uint256){
-        uint256 ganho = _valorVenda * _fatorBonus;
+    function processarVenda(uint256 valorVenda) public view returns (uint256){
+        uint256 ganho = valorVenda * _fatorBonus;
         return ganho;
     }
 }
