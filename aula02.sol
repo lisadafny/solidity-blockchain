@@ -19,4 +19,4 @@ constructor(string memory vendedor, uint256 fatorBonus){
     }
 }
 //Contrato
-//0x804364379c0707566311877874B357493FbBe6f7
+//0xaF49F9b678FE75E1E9Dbe61b859Ce9b6ac3aBb85
