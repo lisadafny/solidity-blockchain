@@ -27,7 +27,7 @@ constructor(string memory locador, string memory locatorio, uint32 valorInicialA
          _locador = nomeAlteracao;
          return true;
      }
-     if(tipoPessoa ==2 ){
+     if(tipoPessoa == 2){
         _locatario = nomeAlteracao;
         return true;
      }
@@ -41,4 +41,4 @@ constructor(string memory locador, string memory locatorio, uint32 valorInicialA
  }
 }
 
-//0x0e1ce2ecb9c9e8513889cdc405cb2ec2e8434816a6bf3d8ed6633c8ecd5be530
+//0xf8Bd158E077E204d17b51578F016CE375eB19396
