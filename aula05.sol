@@ -3,26 +3,8 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Logger {
-    uint32 quantidadeLogs;
 
-    mapping(uint32 => string) public Logs;
-
-    function armazenarLogs(string memory _log) public {
-        require(bytes(_log).length > 0, "Insira uma mensagem para o Log");
-        string memory horarioDoLog = Strings.toString(block.timestamp);
-
-        Logs[quantidadeLogs + 1] = string.concat(horarioDoLog, _log);
-        quantidadeLogs++;
-    }
-
-    function visualizarLogs() external view returns (string memory) {
-        require(quantidadeLogs > 0, "Sem logs para visualizar");
-        string memory logs;
-        for (uint32 i; i < quantidadeLogs; i++) {
-            logs = string.concat(logs, " ", Logs[i]);
-        }
-        return logs;
-    }
+    event armazenarLogs(uint horario, string mensagem);
 }
 
 contract DonoDoContrato is Logger {
@@ -31,7 +13,7 @@ contract DonoDoContrato is Logger {
 
     modifier apenasLocador() {
         require(msg.sender == locador, "Apenas o Locador pode fazer isso");
-        armazenarLogs(
+        emit armazenarLogs(block.number,
             string.concat(
                 Strings.toHexString(msg.sender),
                 " ",
@@ -54,7 +36,7 @@ contract DonoDoContrato is Logger {
             _novoLocador != locador,
             "Novo locador deve ser diferente do locador atual"
         );
-        armazenarLogs(
+        emit armazenarLogs(block.number,
             string.concat(
                 "Locador alterado de: ",
                 Strings.toHexString(locador),
@@ -80,7 +62,7 @@ contract DonoDoContrato is Logger {
             ", locatario: ",
             Strings.toHexString(_locatario)
         );
-        armazenarLogs(string.concat("Hash armazenado: ", hashDasPartes));
+        emit armazenarLogs(block.number, string.concat("Hash armazenado: ", hashDasPartes));
         return hashDasPartes;
     }
 }
@@ -141,7 +123,7 @@ contract ContratoAluguel is DonoDoContrato {
             "Tipo pessoa deve ser 1 para alterar Locador ou 2 para alterar Locatario"
         );
         if (tipoPessoa == 1) {
-            armazenarLogs(
+            emit armazenarLogs(block.number,
                 string.concat(
                     "Nome locador alterado de: ",
                     _contrato.locador,
@@ -152,7 +134,7 @@ contract ContratoAluguel is DonoDoContrato {
             _contrato.locador = nomeAlteracao;
             return true;
         }
-        armazenarLogs(
+        emit armazenarLogs(block.number,
             string.concat(
                 "Nome locador alterado de: ",
                 _contrato.locatario,
@@ -170,7 +152,7 @@ contract ContratoAluguel is DonoDoContrato {
         returns (bool sucesso)
     {
         require(valor > 0, "O ajuste deve ser superior a 0");
-        armazenarLogs(
+        emit armazenarLogs(block.number,
             string.concat(
                 "Valor alterado de: ",
                 Strings.toString(_contrato.valorAluguel[mes - 1]),
