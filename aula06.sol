@@ -7,18 +7,6 @@ pragma solidity 0.8.20;
 /// @author Modificado do Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol)
 /// @author Modificado do Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Nao defina manualmente o saldo sem atualizar o totalSupply, visto que a soma de todos o saldos dos usuarios nao pode exceder o totalSupply.
-interface IERC20 {
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    function transfer(address to, uint256 amount) external returns (bool);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
-}
-
 contract Controle {
     address public dono;
 
@@ -132,7 +120,8 @@ contract ERC20 is Controle {
         uint256 amount
     ) public virtual returns (bool) {
         uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
-
+        require(allowed >= amount, "o valor da transacao supera o valor permitido");
+        require(balanceOf[from] > amount, "usuario nao tem saldo para operacao");
         if (allowed != type(uint256).max)
             allowance[from][msg.sender] = allowed - amount;
 
