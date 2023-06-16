@@ -8,25 +8,31 @@ pragma solidity 0.8.20;
 /// @author Modificado do Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Nao defina manualmente o saldo sem atualizar o totalSupply, visto que a soma de todos o saldos dos usuarios nao pode exceder o totalSupply.
 interface IERC20 {
-
-
-    function approve(address spender, uint256 amount)
-        external
-        returns (bool);
-
+    function approve(address spender, uint256 amount) external returns (bool);
 
     function transfer(address to, uint256 amount) external returns (bool);
-
 
     function transferFrom(
         address from,
         address to,
         uint256 amount
     ) external returns (bool);
-
-
 }
-contract ERC20 {
+
+contract Controle {
+    address public dono;
+
+    modifier somenteDono() {
+        require(msg.sender == dono, "Sem permissao!");
+        _;
+    }
+
+    constructor() {
+        dono = msg.sender;
+    }
+}
+
+contract ERC20 is Controle {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -222,7 +228,7 @@ contract ERC20 {
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function mint(address to, uint256 amount) public {
+    function mint(address to, uint256 amount) public somenteDono {
         totalSupply += amount;
 
         // Cannot overflow because the sum of all user
@@ -234,7 +240,7 @@ contract ERC20 {
         emit Transfer(address(0), to, amount);
     }
 
-    function burn(address from, uint256 amount) public {
+    function burn(address from, uint256 amount) public somenteDono {
         balanceOf[from] -= amount;
 
         // Cannot underflow because a user's balance
@@ -245,18 +251,6 @@ contract ERC20 {
 
         emit Transfer(from, address(0), amount);
     }
-
-    /*//////////////////////////////////////////////////////////////
-                        MODIFICACOES
-    //////////////////////////////////////////////////////////////*/
-    /**
-     * @dev transfer the token from address of this contract
-     * to address of the user (executing the withdrawToken() function
-     */
-    function withdrawToken(address _tokenContract, uint256 _amount) external {
-        IERC20 tokenContract = IERC20(_tokenContract);
-        tokenContract.transfer(msg.sender, _amount);
-    }
 }
 
-//TOKEN E CONTRATO 0x40b854cf8De8A2D454b3c8093fa103B1172Ae32C
+//TOKEN E CONTRATO 0x8d3a4712592A405CA62a5527b04859294174a5DC
