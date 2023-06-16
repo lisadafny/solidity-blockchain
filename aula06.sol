@@ -1,11 +1,31 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.20;
+
 /// @title Implementacao moderna e eficiente de ERC20 + EIP-2612
 /// @author Lisa (https://github.com/lisadafny/solidity-blockchain/blob/main/aula06.sol)
 /// @author Modificado do Jeff Prestes (https://github.com/jeffprestes/cursosolidity/blob/master/7comm-aula06.sol)
 /// @author Modificado do Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol)
 /// @author Modificado do Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Nao defina manualmente o saldo sem atualizar o totalSupply, visto que a soma de todos o saldos dos usuarios nao pode exceder o totalSupply.
+interface IERC20 {
+
+
+    function approve(address spender, uint256 amount)
+        external
+        returns (bool);
+
+
+    function transfer(address to, uint256 amount) external returns (bool);
+
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
+
+
+}
 contract ERC20 {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
@@ -13,7 +33,11 @@ contract ERC20 {
 
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    event Approval(address indexed owner, address indexed spender, uint256 amount);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 amount
+    );
 
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE
@@ -66,7 +90,11 @@ contract ERC20 {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 amount) public virtual returns (bool) {
+    function approve(address spender, uint256 amount)
+        public
+        virtual
+        returns (bool)
+    {
         allowance[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
@@ -74,7 +102,11 @@ contract ERC20 {
         return true;
     }
 
-    function transfer(address to, uint256 amount) public virtual returns (bool) {
+    function transfer(address to, uint256 amount)
+        public
+        virtual
+        returns (bool)
+    {
         balanceOf[msg.sender] -= amount;
 
         // Cannot overflow because the sum of all user
@@ -95,7 +127,8 @@ contract ERC20 {
     ) public virtual returns (bool) {
         uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
 
-        if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
+        if (allowed != type(uint256).max)
+            allowance[from][msg.sender] = allowed - amount;
 
         balanceOf[from] -= amount;
 
@@ -152,7 +185,10 @@ contract ERC20 {
                 s
             );
 
-            require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNER");
+            require(
+                recoveredAddress != address(0) && recoveredAddress == owner,
+                "INVALID_SIGNER"
+            );
 
             allowance[recoveredAddress][spender] = value;
         }
@@ -161,14 +197,19 @@ contract ERC20 {
     }
 
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
-        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
+        return
+            block.chainid == INITIAL_CHAIN_ID
+                ? INITIAL_DOMAIN_SEPARATOR
+                : computeDomainSeparator();
     }
 
     function computeDomainSeparator() internal view virtual returns (bytes32) {
         return
             keccak256(
                 abi.encode(
-                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256(
+                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                    ),
                     keccak256(bytes(name)),
                     keccak256("1"),
                     block.chainid,
@@ -181,7 +222,7 @@ contract ERC20 {
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function mint(address to, uint256 amount) public  {
+    function mint(address to, uint256 amount) public {
         totalSupply += amount;
 
         // Cannot overflow because the sum of all user
@@ -193,7 +234,7 @@ contract ERC20 {
         emit Transfer(address(0), to, amount);
     }
 
-    function burn(address from, uint256 amount) public  {
+    function burn(address from, uint256 amount) public {
         balanceOf[from] -= amount;
 
         // Cannot underflow because a user's balance
@@ -208,16 +249,14 @@ contract ERC20 {
     /*//////////////////////////////////////////////////////////////
                         MODIFICACOES
     //////////////////////////////////////////////////////////////*/
-     /**
-    * @dev transfer the token from address of this contract  
-    * to address of the user (executing the withdrawToken() function)
-    *    tokenContract.transfer(msg.sender, _amount); 
-    */
+    /**
+     * @dev transfer the token from address of this contract
+     * to address of the user (executing the withdrawToken() function
+     */
     function withdrawToken(address _tokenContract, uint256 _amount) external {
-        require(msg.sender == tx.origin, "permissao insuficiente");
-        ERC20 tokenContract = ERC20(_tokenContract);
+        IERC20 tokenContract = IERC20(_tokenContract);
         tokenContract.transfer(msg.sender, _amount);
     }
 }
 
-//TOKEN E CONTRATO 0x888D8Df81a1984dDE4a52ebF27E98381FC847f40
+//TOKEN E CONTRATO 0x40b854cf8De8A2D454b3c8093fa103B1172Ae32C
