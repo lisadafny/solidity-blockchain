@@ -7,31 +7,15 @@ pragma solidity 0.8.20;
 /// @author Modificado do Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol)
 /// @author Modificado do Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Nao defina manualmente o saldo sem atualizar o totalSupply, visto que a soma de todos o saldos dos usuarios nao pode exceder o totalSupply.
-contract Controle {
-    address public dono;
 
-    modifier somenteDono() {
-        require(msg.sender == dono, "Sem permissao!");
-        _;
-    }
-
-    constructor() {
-        dono = msg.sender;
-    }
-}
-
-contract ERC20 is Controle {
+contract ERC20 {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
 
     event Transfer(address indexed from, address indexed to, uint256 amount);
 
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 amount
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 amount);
 
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE
@@ -67,14 +51,10 @@ contract ERC20 is Controle {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimals
-    ) {
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
+    constructor() {
+        name = "Token Teste";
+        symbol = "T7COMM";
+        decimals = 2;
 
         INITIAL_CHAIN_ID = block.chainid;
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
@@ -84,11 +64,7 @@ contract ERC20 is Controle {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 amount)
-        public
-        virtual
-        returns (bool)
-    {
+    function approve(address spender, uint256 amount) public virtual returns (bool) {
         allowance[msg.sender][spender] = amount;
 
         emit Approval(msg.sender, spender, amount);
@@ -96,11 +72,8 @@ contract ERC20 is Controle {
         return true;
     }
 
-    function transfer(address to, uint256 amount)
-        public
-        virtual
-        returns (bool)
-    {
+    function transfer(address to, uint256 amount) public virtual returns (bool) {
+        require(balanceOf[msg.sender]>=amount, "unsuficient balance");
         balanceOf[msg.sender] -= amount;
 
         // Cannot overflow because the sum of all user
@@ -120,21 +93,17 @@ contract ERC20 is Controle {
         uint256 amount
     ) public virtual returns (bool) {
         uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
-        require(allowed >= amount, "o valor da transacao supera o valor permitido");
-        require(balanceOf[from] > amount, "usuario nao tem saldo para operacao");
-        if (allowed != type(uint256).max)
-            allowance[from][msg.sender] = allowed - amount;
-
+        require(allowed > 0, "you are not allowed to perform this transfer");
+        require(allowed != type(uint256).max, "invalid value");
+        require(balanceOf[from]>=amount, "unsuficient balance");
+        allowance[from][msg.sender] = allowed - amount;
         balanceOf[from] -= amount;
-
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.
         unchecked {
             balanceOf[to] += amount;
         }
-
         emit Transfer(from, to, amount);
-
         return true;
     }
 
@@ -180,10 +149,7 @@ contract ERC20 is Controle {
                 s
             );
 
-            require(
-                recoveredAddress != address(0) && recoveredAddress == owner,
-                "INVALID_SIGNER"
-            );
+            require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNER");
 
             allowance[recoveredAddress][spender] = value;
         }
@@ -192,19 +158,14 @@ contract ERC20 is Controle {
     }
 
     function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
-        return
-            block.chainid == INITIAL_CHAIN_ID
-                ? INITIAL_DOMAIN_SEPARATOR
-                : computeDomainSeparator();
+        return block.chainid == INITIAL_CHAIN_ID ? INITIAL_DOMAIN_SEPARATOR : computeDomainSeparator();
     }
 
     function computeDomainSeparator() internal view virtual returns (bytes32) {
         return
             keccak256(
                 abi.encode(
-                    keccak256(
-                        "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                    ),
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256(bytes(name)),
                     keccak256("1"),
                     block.chainid,
@@ -217,7 +178,7 @@ contract ERC20 is Controle {
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function mint(address to, uint256 amount) public somenteDono {
+    function mint(address to, uint256 amount) public  {
         totalSupply += amount;
 
         // Cannot overflow because the sum of all user
@@ -229,7 +190,7 @@ contract ERC20 is Controle {
         emit Transfer(address(0), to, amount);
     }
 
-    function burn(address from, uint256 amount) public somenteDono {
+    function burn(address from, uint256 amount) public  {
         balanceOf[from] -= amount;
 
         // Cannot underflow because a user's balance
@@ -241,5 +202,3 @@ contract ERC20 is Controle {
         emit Transfer(from, address(0), amount);
     }
 }
-
-//TOKEN E CONTRATO 0x8d3a4712592A405CA62a5527b04859294174a5DC
