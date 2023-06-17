@@ -52,8 +52,8 @@ contract ERC20 {
     //////////////////////////////////////////////////////////////*/
 
     constructor() {
-        name = "Token Teste";
-        symbol = "T7COMM";
+        name = "MajorasCoin";
+        symbol = "MASK";
         decimals = 2;
 
         INITIAL_CHAIN_ID = block.chainid;
@@ -93,7 +93,7 @@ contract ERC20 {
         uint256 amount
     ) public virtual returns (bool) {
         uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
-        require(allowed > 0, "you are not allowed to perform this transfer");
+        require(allowed > amount, "you are not allowed to perform this transfer");
         require(allowed != type(uint256).max, "invalid value");
         require(balanceOf[from]>=amount, "unsuficient balance");
         allowance[from][msg.sender] = allowed - amount;
