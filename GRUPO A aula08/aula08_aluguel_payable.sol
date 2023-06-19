@@ -126,7 +126,7 @@ contract Aluguel {
     function saqueTotal() public returns(bool){
         require(msg.sender == contratoAluguel.locador, "Somente o Locador pode sacar");
         uint amount = address(this).balance;
-        (bool success, ) = contratoAluguel.locador.call{value: amount}("");
+        bool success = saqueParcial(amount);
         require(success, "Falhou em enviar ether");
         return success;
     }
