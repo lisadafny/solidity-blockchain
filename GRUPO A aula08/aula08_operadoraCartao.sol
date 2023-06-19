@@ -19,13 +19,13 @@ contract Autorizador {
 
 contract ClienteBanco {
     string public cpf;
-    IERC20 public token;
+    IERC20 public addressRealDigital;
     address public operadorBanco;
 
     constructor(string memory _cpf) {
         cpf = _cpf;
         operadorBanco = msg.sender;
-        token = IERC20(0x2B4CC3ee041eBc98C8aB2071bC9dDBd2D8a8cE41);
+        addressRealDigital = IERC20(0x2B4CC3ee041eBc98C8aB2071bC9dDBd2D8a8cE41);
     }
 
     modifier somenteBanco() {
@@ -37,7 +37,7 @@ contract ClienteBanco {
     }
 
     function saldoCliente() public view returns (uint256) {
-        return token.balanceOf(address(this));
+        return addressRealDigital.balanceOf(address(this));
     }
 
     function saque(uint256 valor) external somenteBanco returns (bool) {
@@ -45,16 +45,17 @@ contract ClienteBanco {
             saldoCliente() >= valor,
             "valor solicitado inferior ao saldo disponivel"
         );
-        bool success = token.transfer(operadorBanco, valor);
+        bool success = addressRealDigital.transfer(operadorBanco, valor);
         require(success, "houve falha no saque");
 
         return success;
     }
 
+
     function cobrar(uint256 valor) external somenteBanco returns (bool) {
-        IERC20 contrato = IERC20(token);
-        require(contrato.balanceOf(operadorBanco) >= valor);
-        bool sucesso = contrato.transferFrom(operadorBanco, address(this), valor);
+        IERC20 realDigital = IERC20(addressRealDigital);
+        require(realDigital.balanceOf(operadorBanco) >= valor);
+        bool sucesso = realDigital.transferFrom(operadorBanco, address(this), valor);
         require(sucesso, "houve falha no deposito");
 
         return sucesso;
@@ -65,9 +66,9 @@ contract ClienteBanco {
         somenteBanco
         returns (bool)
     {
-        IERC20 contrato = IERC20(token);
-        require(contrato.balanceOf(address(this)) > valor);
-        bool sucesso = contrato.approve(terceiro, valor);
+        IERC20 realDigital = IERC20(addressRealDigital);
+        require(realDigital.balanceOf(address(this)) > valor);
+        bool sucesso = realDigital.approve(terceiro, valor);
         require(sucesso, "houve falha no deposito");
 
         return sucesso;
@@ -77,11 +78,11 @@ contract ClienteBanco {
 contract OperadoraCartao is Autorizador {
     function transferir(uint256 valor, address contaClienteBanco)
         external
-        estouAutorizado(contratoCliente)
+        estouAutorizado(contaClienteBanco)
         returns (bool)
     {
         bool sucesso = token.transferFrom(
-            contratoCliente,
+            contaClienteBanco,
             address(this),
             valor
         );
