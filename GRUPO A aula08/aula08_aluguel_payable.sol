@@ -5,7 +5,6 @@ pragma solidity 0.8.20;
 contract Aluguel {
     uint8 public constant MAXIMO_NUMERO_PARCELAS = 36;
     ContratoAluguel public contratoAluguel;
-    bytes32 internal passCode;
 
     event Track(string indexed _function, address sender, uint value, bytes data);
 
@@ -18,8 +17,7 @@ contract Aluguel {
     //O nome das partes, locador e locatário, e o valor inicial de cada aluguel deve ser informado no momento da publicação do contrato.
     constructor(
         address _locatario,
-        uint256 valorInicialAluguel,
-        string memory _passCode
+        uint256 valorInicialAluguel
     ) {
         uint256[MAXIMO_NUMERO_PARCELAS] memory valoresAluguel;
         for (uint8 i = 0; i < valoresAluguel.length; i++) {
@@ -29,18 +27,12 @@ contract Aluguel {
         contratoAluguel.locador = msg.sender;
         contratoAluguel.locatario = _locatario;
         contratoAluguel.valorAluguel = valoresAluguel;
-
-        passCode = keccak256(bytes(_passCode));
     }
 
     modifier validateOperation(string memory _passCode) {
         require(
             contratoAluguel.locador == msg.sender,
             "Somente o locador pode alterar o contrato"
-        );
-        require(
-            passCode == keccak256(bytes(_passCode)),
-            "Passcode nao corresponde ao informado na criacao do contrato!"
         );
         _;
     }
@@ -117,7 +109,7 @@ contract Aluguel {
         require(contratoAluguel.valorAluguel[mes - 1] > 0, "Esse mes esta pago");
         require(msg.value == contratoAluguel.valorAluguel[mes - 1], "valor do aluguel nao condiz com o mes");
         contratoAluguel.valorAluguel[mes - 1] = 0;
-        emit Track("deposit()", msg.sender, msg.value, "");
+        emit Track("pagarAluguel()", msg.sender, msg.value, "");
     }
 
     function sacar() public returns(bool){
