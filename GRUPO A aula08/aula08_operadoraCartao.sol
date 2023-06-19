@@ -20,17 +20,17 @@ contract Autorizador {
 contract ClienteBanco {
     string public cpf;
     IERC20 public token;
-    address public chave;
+    address public operadorBanco;
 
     constructor(string memory _cpf) {
         cpf = _cpf;
-        chave = msg.sender;
+        operadorBanco = msg.sender;
         token = IERC20(0x2B4CC3ee041eBc98C8aB2071bC9dDBd2D8a8cE41);
     }
 
     modifier somenteBanco() {
         require(
-            msg.sender == chave,
+            msg.sender == operadorBanco,
             "somente o banco pode fazer essa operacao"
         );
         _;
@@ -45,16 +45,16 @@ contract ClienteBanco {
             saldoCliente() >= valor,
             "valor solicitado inferior ao saldo disponivel"
         );
-        bool success = token.transfer(chave, valor);
+        bool success = token.transfer(operadorBanco, valor);
         require(success, "houve falha no saque");
 
         return success;
     }
 
-    function depositar(uint256 valor) external somenteBanco returns (bool) {
+    function cobrar(uint256 valor) external somenteBanco returns (bool) {
         IERC20 contrato = IERC20(token);
-        require(contrato.balanceOf(chave) >= valor);
-        bool sucesso = contrato.transferFrom(chave, address(this), valor);
+        require(contrato.balanceOf(operadorBanco) >= valor);
+        bool sucesso = contrato.transferFrom(operadorBanco, address(this), valor);
         require(sucesso, "houve falha no deposito");
 
         return sucesso;
@@ -75,7 +75,7 @@ contract ClienteBanco {
 }
 
 contract OperadoraCartao is Autorizador {
-    function transferir(uint256 valor, address contratoCliente)
+    function transferir(uint256 valor, address contaClienteBanco)
         external
         estouAutorizado(contratoCliente)
         returns (bool)
