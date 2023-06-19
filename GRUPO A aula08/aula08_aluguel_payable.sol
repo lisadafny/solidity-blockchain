@@ -129,9 +129,5 @@ contract Aluguel {
         require(success, "Falhou em enviar ether");
         return success;
     }
-
-    function balance() public view returns(uint) {
-        return address(this).balance;
-    }
 }
-//Contrato 0xf699D972Eae24476117356d0137594372F6E4Fd9
+//Contrato 0xA8b69e4F983CdE8A2B26F890839b101dD8B32e4B
