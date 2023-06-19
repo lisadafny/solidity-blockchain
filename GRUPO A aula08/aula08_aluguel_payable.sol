@@ -112,7 +112,18 @@ contract Aluguel {
         emit Track("pagarAluguel()", msg.sender, msg.value, "");
     }
 
-    function sacar() public returns(bool){
+    function saqueParcial(uint valor) public returns(bool){
+        require(msg.sender == contratoAluguel.locador, "Somente o Locador pode sacar");
+        require(
+            address(this).balance >= valor,
+            "valor solicitado inferior ao saldo disponivel"
+        );
+        (bool success, ) = contratoAluguel.locador.call{value: valor}("");
+        require(success, "Falhou em enviar ether");
+        return success;
+    }
+
+    function saqueTotal() public returns(bool){
         require(msg.sender == contratoAluguel.locador, "Somente o Locador pode sacar");
         uint amount = address(this).balance;
         (bool success, ) = contratoAluguel.locador.call{value: amount}("");
